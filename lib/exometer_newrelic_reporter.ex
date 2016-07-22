@@ -1,0 +1,2 @@
+defmodule ExometerNewrelicReporter do
+end
