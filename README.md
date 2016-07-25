@@ -1,6 +1,6 @@
-# ExometerNewrelicReporter
+# Exometer NewRelic Reporter
 
-**TODO: Add description**
+A [exometer](https://github.com/Feuerlabs/exometer) reporter for [New Relic](https://newrelic.com/).
 
 ## Installation
 
@@ -10,7 +10,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:exometer_newrelic_reporter, "~> 0.1.0"}]
+      [{:exometer_newrelic_reporter, github: "doomspork/exometer_newrelic_reporter", "> 0.0.0"}]
     end
     ```
 
