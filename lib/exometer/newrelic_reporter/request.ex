@@ -24,18 +24,18 @@ defmodule Exometer.NewrelicReporter.Request do
   @doc """
   Record metrics on New Relic
   """
-  def push_metrics({redirect_host, run_id}, data) do
+  def push_metrics({redirect_host, license_key, run_id}, data) do
     now  = :os.system_time(:seconds)
     body = [run_id, now - 60, now, data]
-    newrelic_request(redirect_host, body, %{method: :metric_data, run_id: run_id})
+    newrelic_request(redirect_host, license_key, body, %{method: :metric_data, run_id: run_id})
   end
 
   @doc """
   Record an error on New Relic
   """
-  def push_errors({redirect_host, run_id}, errors) do
+  def push_errors({redirect_host, license_key, run_id}, errors) do
     body = [run_id, errors]
-    newrelic_request(redirect_host, body, %{method: :error_data, run_id: run_id})
+    newrelic_request(redirect_host, license_key, body, %{method: :error_data, run_id: run_id})
   end
 
   defp base_params(license_key) do
@@ -47,9 +47,9 @@ defmodule Exometer.NewrelicReporter.Request do
   end
 
   defp connect({redirect_host, license_key}, opts) do
-    body =  opts
-            |> connect_payload
-            |> Poison.encode!
+    body = opts
+           |> connect_payload
+           |> Poison.encode!
 
     run_id =
       redirect_host
@@ -57,7 +57,7 @@ defmodule Exometer.NewrelicReporter.Request do
       |> extract_return_value
       |> Map.get("agent_run_id")
 
-    {redirect_host, run_id}
+    {redirect_host, license_key, run_id}
   end
 
   defp connect_payload(opts) do
@@ -65,15 +65,15 @@ defmodule Exometer.NewrelicReporter.Request do
     high_security = Keyword.get(opts, :high_security, false)
 
     [%{
-      environment: %{},
+      agent_version: @agent_version,
+      app_name:      [app_name],
+      environment:   %{},
       high_security: high_security,
-      host: hostname(),
-      identifier: app_name,
-      language: @language,
-      app_name: [app_name],
-      pid: pid(),
-      settings: %{},
-      agent_version: @agent_version
+      host:          hostname(),
+      identifier:    app_name,
+      language:      @language,
+      pid:           pid(),
+      settings:      %{}
     }]
   end
 
@@ -88,6 +88,8 @@ defmodule Exometer.NewrelicReporter.Request do
     |> Map.get("exception")
     |> Map.get("message")
     |> Logger.error
+
+    throw(:newrelic_error)
   end
 
   defp hostname do
@@ -97,14 +99,14 @@ defmodule Exometer.NewrelicReporter.Request do
 
   defp newrelic_params(host, license_key, params) do
     url =
-    @base_url
-    |> :io_lib.format([host])
-    |> to_string
+      @base_url
+      |> :io_lib.format([host])
+      |> to_string
 
     params =
-    license_key
-    |> base_params
-    |> Map.merge(params)
+      license_key
+      |> base_params
+      |> Map.merge(params)
 
     {url, params}
   end
@@ -115,7 +117,7 @@ defmodule Exometer.NewrelicReporter.Request do
   end
   defp newrelic_request(host, license_key, body, params) do
     {url, params} = newrelic_params(host, license_key, params)
-    HTTPoison.post!(url, body, [{"Content-Encoding", "identity"}], params: params)
+    HTTPoison.post!(url, body, %{"Content-Encoding" => "identity"}, params: params)
   end
 
   defp pid, do: :os.getpid() |> List.to_integer
