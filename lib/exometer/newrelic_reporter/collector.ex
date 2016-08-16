@@ -11,17 +11,9 @@ defmodule Exometer.NewrelicReporter.Collector do
   @empty_storage %{}
 
   @doc """
-  Shortcut to start_link/3 for our Collector
-  """
-  def start_link(state \\ []),
-    do: GenServer.start_link(Collector, state, name: Collector)
-
-  @doc """
   Initialize our Collector with empty storage
   """
-  def init(_opts) do
-    {:ok, storage: @empty_storage}
-  end
+  def init(_opts), do: {:ok, storage: @empty_storage}
 
   @doc """
   Record the metric data at the given key on the GenServer
