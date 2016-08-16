@@ -1,6 +1,8 @@
 # Exometer NewRelic Reporter
 
-A [exometer](https://github.com/Feuerlabs/exometer) reporter for [New Relic](https://newrelic.com/).
+A [exometer](https://github.com/Feuerlabs/exometer)/[elixometer](https://github.com/pinterest/elixometer) reporter for [New Relic](https://newrelic.com/).
+
+_Currently under active development_
 
 ## Installation
 
@@ -21,3 +23,23 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
       [applications: [:exometer_newrelic_reporter]]
     end
     ```
+
+## Configuration
+
+The following assumes you're using Elixometer though configuration should be similar for Exometer:
+
+```markdown
+config :exometer_core, report: [
+  reporters: ["Elixir.Exometer.NewrelicReporter":
+    [
+      application_name: "MyApp",
+      license_key: System.get_env("NEWRELIC_LICENSE_KEY")
+    ]
+  ]
+]
+
+config :elixometer, reporter: :"Elixir.Exometer.NewrelicReporter",
+  update_frequency: 5_000
+```
+
+Note the `"Elixir."` prefix when setting our module, this is required by exometer and Erlang in order to lookup the module.
