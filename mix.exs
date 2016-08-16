@@ -14,7 +14,8 @@ defmodule Exometer.NewrelicReporter.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:httpoison, :logger]]
+    [applications: [:httpoison, :logger],
+     mod: {Exometer.NewrelicReporter, []}]
   end
 
   defp deps do

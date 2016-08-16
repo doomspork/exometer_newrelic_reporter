@@ -1,9 +1,21 @@
 defmodule Exometer.NewrelicReporter do
+  use Application
+
   @behaviour :exometer_report
 
   alias HTTPoison.Response
-  import Exometer.NewrelicReporter.Formats
-  import Exometer.NewrelicReporter.Request
+  alias Exometer.NewrelicReporter.Collector
+
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
+
+    children = [
+      worker(Collector, []),
+    ]
+
+    opts = [strategy: :one_for_one, name: Collector.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
 
   @doc """
   Entrypoint to our reporter, invoked by Exometer with configuration options.
@@ -13,11 +25,8 @@ defmodule Exometer.NewrelicReporter do
   @doc """
   Invoked by Exometer when there is new data to report.
   """
-  def exometer_report(metric, _data_point, _extra, value, opts) do
-    metric
-    |> get_type_and_name
-    |> format(value)
-    |> post(opts)
+  def exometer_report(metric, _data_point, _extra, values, opts) do
+    Collector.collect(metric, values)
 
     {:ok, opts}
   end
@@ -30,14 +39,4 @@ defmodule Exometer.NewrelicReporter do
   def exometer_subscribe(_, _, _, _, opts), do: {:ok, opts}
   def exometer_terminate(_, _),             do: nil
   def exometer_unsubscribe(_, _, _, opts),  do: {:ok, opts}
-
-  defp get_type_and_name(metric) do
-    [_app, _env, type] = Enum.slice(metric, 0..2)
-    name =
-      metric
-      |> Enum.slice(3..-1)
-      |> Enum.join("/")
-
-    {type, name}
-  end
 end
