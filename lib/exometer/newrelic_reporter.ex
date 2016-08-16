@@ -4,13 +4,14 @@ defmodule Exometer.NewrelicReporter do
   @behaviour :exometer_report
 
   alias HTTPoison.Response
-  alias Exometer.NewrelicReporter.Collector
+  alias Exometer.NewrelicReporter.{Collector, Reporter}
 
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     children = [
       worker(Collector, []),
+      worker(Reporter, [])
     ]
 
     opts = [strategy: :one_for_one, name: Collector.Supervisor]
