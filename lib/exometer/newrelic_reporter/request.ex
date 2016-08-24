@@ -12,7 +12,7 @@ defmodule Exometer.NewrelicReporter.Request do
   @language "python" # We're mimicking newrelic-erlang
   @protocol_v 10
 
-  def post(data, opts) do
+  def request(data, opts) do
     license_key = Keyword.fetch!(opts, :license_key)
 
     license_key

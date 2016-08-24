@@ -7,7 +7,7 @@ defmodule Exometer.NewrelicReporter.Reporter do
 
   require Logger
 
-  import Exometer.NewrelicReporter.{Aggregator, Formatter, Request}
+  import Exometer.NewrelicReporter.{Aggregator, Request}
   import Exometer.NewrelicReporter.Collector, only: [dispense: 0]
 
   alias __MODULE__, as: Reporter
@@ -39,6 +39,7 @@ defmodule Exometer.NewrelicReporter.Reporter do
 
     dispense
     |> aggregate
+    |> request(opts)
 
     wait_then_report(opts)
 
